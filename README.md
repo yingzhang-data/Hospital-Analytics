@@ -21,7 +21,7 @@ Number of fields: 55 unique fields across all tables
 
 ### 3. Business Questions and Solutions
 
-**Objective 1: Encounters Overview**
+**Objective 1: Encounters Overview**  
 **Q1: How many total encounters occurred each year?**
 
 <details>
@@ -42,6 +42,7 @@ ORDER BY yr;
 **Output**
 
 <img width="163" height="219" alt="1" src="https://github.com/user-attachments/assets/3b4f052a-bbd3-45fa-89c6-800ab73700fb" />
+
 
 **Q2: For each year, what percentage of all encounters belonged to each encounter class (ambulatory, outpatient, wellness, urgent care, emergency, and inpatient)?**
 
@@ -104,13 +105,156 @@ FROM encounters;
 <img width="215" height="55" alt="3" src="https://github.com/user-attachments/assets/b0c21579-07d7-4f4b-92e9-1aa594bc72a7" />
 
 
-Objective 2: Cost & Coverage Insights  
-* How many encounters had zero payer coverage, and what percentage of total encounters does this represent?
-* What are the top 10 most frequent procedures performed and the average base cost for each?
-* What are the top 10 procedures with the highest average base cost and the number of times they were performed?
-* What is the average total claim cost for encounters, broken down by payer?
+**Objective 2: Cost & Coverage Insights**  
+**Q1:** How many encounters had zero payer coverage, and what percentage of total encounters does this represent?  
 
-Objective 3: Patients Behavior Analysis  
-* How many unique patients were admitted each quarter over time?
-* How many patients were readmitted within 30 days of a previous encounter?
-* Which patients had the most readmissions?
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+SELECT
+	SUM(CASE WHEN PAYER_COVERAGE = 0 THEN 1 ELSE 0 END) AS zero_payer_coverage,
+    COUNT(*) AS total_encounters,
+	ROUND(SUM(CASE WHEN PAYER_COVERAGE = 0 THEN 1 ELSE 0 END)
+    /COUNT(*) * 100,1) AS percent_zero_payer_coverage
+FROM encounters;
+```
+</details>  
+
+**Output**
+
+<img width="405" height="54" alt="4" src="https://github.com/user-attachments/assets/8cd47331-ecf4-42e9-9060-5d85a3a2d82e" />
+
+
+**Q2:** What are the top 10 most frequent procedures performed and the average base cost for each?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+SELECT 
+	CODE,DESCRIPTION,COUNT(*) AS num_procedures,
+    ROUND(AVG(BASE_COST),1) AS avg_base_cost
+FROM procedures
+GROUP BY CODE,DESCRIPTION
+ORDER BY num_procedures DESC
+LIMIT 10;
+```
+</details>  
+
+**Output**
+
+<img width="540" height="183" alt="5" src="https://github.com/user-attachments/assets/eef9001a-1bb5-4e27-af41-c409100d472c" />
+
+**Q3:** What are the top 10 procedures with the highest average base cost and the number of times they were performed?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+SELECT 
+	CODE,DESCRIPTION,COUNT(*) AS num_procedures,
+    ROUND(AVG(BASE_COST),1) AS avg_base_cost
+FROM procedures
+GROUP BY CODE,DESCRIPTION
+ORDER BY avg_base_cost DESC
+LIMIT 10;
+```
+</details>  
+
+**Output**
+
+<img width="508" height="192" alt="6" src="https://github.com/user-attachments/assets/7dbe8969-4f8d-4e71-b718-921b1011ec34" />
+
+**Q4:** What is the average total claim cost for encounters, broken down by payer?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+SELECT
+	p.NAME,
+    ROUND(AVG(e.TOTAL_CLAIM_COST),1)AS avg_total_claim_cost
+FROM payers p
+LEFT JOIN encounters e
+ON p.ID = e.PAYER
+GROUP BY p.NAME
+ORDER BY avg_total_claim_cost DESC;
+```
+</details>  
+
+**Output**
+
+<img width="505" height="189" alt="7" src="https://github.com/user-attachments/assets/43468b10-7519-41bf-9035-71f5e78b5c62" />
+
+**Objective 3: Patients Behavior Analysis**  
+**Q1:** How many unique patients were admitted each quarter over time?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+SELECT
+	CONCAT(YEAR(START), 'Q',QUARTER(START)) AS yr_qt,
+    COUNT(DISTINCT PATIENT) AS num_unique_patients	 
+FROM encounters
+GROUP BY yr_qt;
+```
+</details>  
+
+**Output**
+
+<img width="190" height="716" alt="8" src="https://github.com/user-attachments/assets/4ba8b568-c915-4d3c-b530-8e9a2d21d660" />
+
+**Q2:** How many patients were readmitted within 30 days of a previous encounter?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+WITH cte AS (
+SELECT
+	PATIENT,
+    START,
+    STOP,
+	LEAD(START)OVER(PARTITION BY PATIENT ORDER BY START) AS next_start
+FROM encounters
+)
+SELECT COUNT(DISTINCT PATIENT) AS num_patients
+FROM cte
+WHERE DATEDIFF(next_start,STOP) < 30;
+```
+</details>  
+
+**Output**
+
+<img width="102" height="54" alt="9" src="https://github.com/user-attachments/assets/b0ba66eb-3999-4e82-bc4b-687a97e8be4c" />
+
+
+**Q3:** Which patients had the most readmissions?
+
+<details>
+<summary> Show SQL Query </summary>
+
+```sql
+WITH cte AS (
+SELECT
+	PATIENT,
+    START,
+    STOP,
+	LEAD(START)OVER(PARTITION BY PATIENT ORDER BY START) AS next_start
+FROM encounters
+)
+SELECT 
+PATIENT,
+COUNT(*) AS num_readmissions
+FROM cte
+WHERE DATEDIFF(next_start,STOP) < 30
+GROUP BY PATIENT
+ORDER BY num_readmissions DESC;
+```
+</details>  
+
+**Output**
+
+<img width="340" height="241" alt="10" src="https://github.com/user-attachments/assets/4a329654-74e1-4ed1-95d7-d729c869e26c" />
