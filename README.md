@@ -257,4 +257,7 @@ ORDER BY num_readmissions DESC;
 
 **Output**
 
+
+
+
 <img width="340" height="241" alt="10" src="https://github.com/user-attachments/assets/4a329654-74e1-4ed1-95d7-d729c869e26c" />
