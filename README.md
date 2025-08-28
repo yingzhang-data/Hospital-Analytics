@@ -1,7 +1,7 @@
 # Hospital-Analytics
 
 ### 1. Introduction
-**1.1 Context**
+**1.1 Context**  
 As a data analyst at a healthcare analytics consulting firm, I have been tasked with supporting Massachusetts General Hospital in preparing their annual performance report. our analysis focuses on patient encounters, costs, insurance coverage, and behavioral trends to support planning and improve care delivery and optimizing hospital operations.
 
 **1.2 Objective**
