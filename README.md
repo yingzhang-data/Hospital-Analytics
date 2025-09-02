@@ -1,4 +1,4 @@
-# Hospital-Analytics
+# Hospital Analytics
 
 ### 1. Introduction
 **1.1 Context**  
