@@ -175,7 +175,8 @@ ORDER BY avg_total_claim_cost DESC;
 
 **Output**
 
-<img width="505" height="189" alt="7" src="https://github.com/user-attachments/assets/43468b10-7519-41bf-9035-71f5e78b5c62" />
+<img width="265" height="186" alt="7" src="https://github.com/user-attachments/assets/70f1c051-37cf-42e9-a89e-49cea449b1e7" />
+
 
 **Objective 3: Patients Behavior Analysis**  
 **Q1:** How many unique patients were admitted each quarter over time?
